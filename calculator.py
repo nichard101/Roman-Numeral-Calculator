@@ -1,3 +1,5 @@
+import math
+
 dict = {
     "M": 1000,
     "D": 500,
@@ -6,36 +8,96 @@ dict = {
     "X": 10,
     "V": 5,
     "I": 1
-}
+    }
 
-def validate(input):
-    r = 0
-    l = 0
+def LTN(l):
+    return dict[l]
 
-    # Count runs and run lengths of letters
-    # Invalid if any run exceeds 3
-    # If run of higher letter follows run of lower letter, invalid if run exceeds 1
+def isEven(num):
+    if num % 2 == 0:
+        return True
+    else:
+        return False
 
-    return True
+def getNumDigits(letter):
+    return GND(LTN(letter))
 
-def convert(input):
-    l = 0
-    n = 0
-    while l < len(user_input):
-        if l < len(user_input) - 1: # Check all digits which have a following digit
-            if dict[user_input[l]] >= dict[user_input[l+1]]:
-                n += dict[user_input[l]] # If next digit is lower, add value
-            else:
-                n -= dict[user_input[l]] # If next digit is higher, take value
-        else:
-            n += dict[user_input[l]] # Add value of final digit
-        l += 1
+def getDifDigits(l1, l2):
+    return abs(getNumDigits(l1)-getNumDigits(l2))
+
+def GND(num):
+    return int(math.log10(num))
+
+def comparePlaces(n1, n2):
+    d1, d2 = getNumDigits(n1), getNumDigits(n2)
+    if d1 > d2:
+        return 1
+    elif d1 == d2:
+        return 0
+    else:
+        return -1
+
+def letterValid(letter):
+    if letter in dict.keys():
+        return True
+    else:
+        return False
+
+def isSub(l1, l2):
+    n1, n2 = getNumDigits(l1), getNumDigits(l2)
+    if n1 <= n2:
+        return True
+    else:
+        return False
+
+def lastLetter(s):
+    return s[len(s)-1]
+
+def firstDigit(num):
+    n = LTN(num)
+    while n > 10:
+        n /= 10
     return n
-    
+
+user_input = ""
+
 while user_input == "":
     
     user_input = input("Enter numeral or Q: ")
+    print(user_input)
 
-    if user_input != "Q" and validate(user_input):
-        print("{} = {}".format(user_input, convert(user_input)))
-        user_input = ""
+    if user_input != "Q":
+        last = 0
+        output = ["","","",""]
+        print(output)
+
+        i = 0
+        size = len(user_input)
+
+        while i < size:
+            letter = user_input[i]
+            d = getNumDigits(letter)
+            if i < size-1:
+                next_letter = user_input[i+1]
+                if isSub(letter, next_letter):
+                    output[d-getDifDigits(letter, next_letter)] += (letter + next_letter)
+                    i += 1
+                else:
+                    if letter not in output[d]:
+                        output[d] += letter
+                    elif firstDigit(letter) == 1:
+                        if lastLetter(output[d]) == letter:
+                            output[d] += letter
+
+            elif i == size-1:
+                if letter not in output[d]:
+                    output[d] += letter
+                elif firstDigit(letter) == 1:
+                    if lastLetter(output[d]) == letter:
+                        output[d] += letter
+            i += 1
+            print(output)
+
+        
+    
+    user_input = ""
