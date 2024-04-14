@@ -43,14 +43,8 @@ def getFirstDigit(letter):
         num /= 10
     return num
 
-def isSubtraction(l1, l2):
-    d1, d2 = R2D(l1), R2D(l2)
-    if d1 < d2:
-        return True
-    return False
-
-def lastLetter(s):
-    return s[len(s)-1]
+def isSameDigit(letterA,letterB):
+    return getFirstDigit(letterA) == getFirstDigit(letterB)
 
 def validateSlice(A, B=None, C=None): # UP DOWN
     """
@@ -60,34 +54,40 @@ def validateSlice(A, B=None, C=None): # UP DOWN
     A+B+C   A=B=C
     """
     da, db, dc = R2D(A), R2D(B), R2D(C)
-    print("{} {} {}".format(da,db,dc))
+    dac, dab, dbc = getDigitsDifference(A,C), getDigitsDifference(A,B), getDigitsDifference(B,C)
 
+    if da < dc:
+        raise Exception("Error: Incorrect order of ascension (C) - {} {} [{}]".format(A,B,C))
+    
     if da == dc:
         if getFirstDigit(A) == 5:
-            raise Exception("Error: {} {} {}".format(A,B,C))
+            raise Exception("Error: Two 5s of same kind - [{}] {} [{}]".format(A,B,C))
+        if db > da:
+            raise Exception("Error: Incorrect ascension (B) - {} [{}] {}".format(A,B,C))
+        if dab < -1:
+            raise Exception("Error: Incorrect descension (B) - {} [{}] {}".format(A,B,C))
     
-    if da > db:
-        if da > dc:
-            if dc > db:
-                return 2
-            elif db == dc:
-                return 1
-            else:
-                return 4
-        elif da == dc:
-            return 5
-        else:
-            raise Exception("Error: {} {} {}".format(A,B,C))
-    elif da < db:
-        if da > dc:
-            return 3
-        else:
-            raise Exception("Error: {} {} {}".format(A,B,C))
-    elif da == db:
-        if db == dc:
-            return 0
-        else:
-            raise Exception("Error: {} {} {}".format(A,B,C))
+    if db > da:
+        if da == dc:
+            if getFirstDigit(A) == 5:
+                raise Exception("Error: Two 5s of same kind - [{}] {} [{}]".format(A,B,C))
+            if dab < -1:
+                raise Exception("Error: Incorrect descension (B) - {} [{}] {}".format(A,B,C))        
+        if getDigitsDifference(A,B) >= 1:
+            if getDigitsDifference(A,B) > 1 or (getDigitsDifference(A,B) == 1 and not isSameDigit(A, B)):
+                raise Exception("Error: Incorrect ascension (B) - {} [{}] {}".format(A,B,C))
+        return 1
+
+    if dc > db:
+        if getFirstDigit(B) != 1:   # Only 1s can come before higher digits
+            raise Exception("Error: Wrong digit for subtraction - {}".format(B))
+        if getDigitsDifference(B,C) > 0:
+            if getDigitsDifference(B,C) > 1:
+                raise Exception("Error: Incorrect order of ascension (B^C) - {} {}".format(A,B))
+            elif not isSameDigit(B,C):
+                raise Exception("Error: Wrong subtraction combination - {} {}".format(A,B))   
+    if da >= db:
+        return 0
 
 def countLetters(input, letter):
     n = 0
@@ -96,33 +96,15 @@ def countLetters(input, letter):
             n += 1
     return n
 
-def validateLetterCount(input, A):
-    if isEven(roman.index(A)):
-        return countLetters(input, A) <= (MAX_ADDITIVE + MAX_SUBTRACTIVE)
-    else:
-        return countLetters(input, A) <= 1
-    
-def validateLetter(letter):
-    if letter in roman:
-        return True
-    else:
-        return False
-
 def validateAllLetters(input):
     for letter in input:
         if letter not in roman:
             raise Exception("Letter {} not valid".format(letter))
 
 def validateRuns(input):
-    score_dict = {}
     run = 1
     prev_letter = ""
-    for letter in input:
-        if letter not in score_dict.keys():
-            score_dict[letter] = 1
-        else:
-            score_dict[letter] += 1
-        
+    for letter in input:       
         if letter == prev_letter:
             run += 1
         else:
@@ -149,28 +131,11 @@ def processInput(user_input):
         n = validateSlice(a, b, c)
         if n == 0:
             output += R2D(a)
-            output += R2D(b)
-            output += R2D(c)
-            user_input = user_input[3:]
+            user_input = user_input[1:]
         elif n == 1:
-            output += R2D(a)
-            user_input = user_input[1:]
-        elif n == 2:
-            output += R2D(a)
-            user_input = user_input[1:]
-        elif n == 3:
-            output += R2D(b)
             output -= R2D(a)
-            user_input = user_input[2:]
-        elif n == 4:
-            output += R2D(a)
             output += R2D(b)
             user_input = user_input[2:]
-        elif n == 5:
-            output += R2D(a)
-            output -= R2D(b)
-            user_input = user_input[2:]
-        print(output)
     return output
 
 user_input = ""
